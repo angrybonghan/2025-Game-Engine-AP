@@ -1,37 +1,57 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class PlayerController : MonoBehaviour
 {
     public float speed = 5f;
     public float jumpPower = 5f;
     public float gravity = -9.8f;
-
+    
+    public CinemachineVirtualCamera virtualCam;
+    public float rotationSpeed = 10f;
     private CharacterController controller;
+    private CinemachinePOV pov;
     private Vector3 velocity;
     public bool isGrounded;
 
     void Start()
     {
         controller = GetComponent<CharacterController>();
+        pov = virtualCam.GetCinemachineComponent<CinemachinePOV>();
     }
 
     void Update()
     {
         isGrounded = controller.isGrounded;
 
-        // Grounded 상태에서 아래로 계속 떨어지지 않도록 보정
+       
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f; // 살짝 눌러주는 값
+            velocity.y = -2f; 
         }
-
-        // 이동 입력
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
-        Vector3 move = new Vector3(x, 0, z);
+
+        Vector3 camForward = virtualCam.transform.forward;
+        camForward.y = 0;
+        camForward.Normalize();
+
+        Vector3 camRight = virtualCam.transform.right;
+        camRight.y = 0;
+        camRight.Normalize();
+
+        Vector3 move = (camForward * z + camRight * x).normalized;
         controller.Move(move * speed * Time.deltaTime);
+
+        float cameraYaw = pov.m_HorizontalAxis.Value;
+        Quaternion targetRot = Quaternion.Euler(0f, cameraYaw, 0f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, rotationSpeed * Time.deltaTime);
+        
+        
+       
+        
 
         // 점프 입력
         if (isGrounded && Input.GetKeyDown(KeyCode.Space))
