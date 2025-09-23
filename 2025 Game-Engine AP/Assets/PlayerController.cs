@@ -15,6 +15,9 @@ public class PlayerController : MonoBehaviour
     private CinemachinePOV pov;
     private Vector3 velocity;
     public bool isGrounded;
+    public CInemachineSwitcher switcher;
+    float x = 0f;
+    float z = 0f;
 
     void Start()
     {
@@ -31,10 +34,25 @@ public class PlayerController : MonoBehaviour
         {
             velocity.y = -2f; 
         }
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
 
-        Vector3 camForward = virtualCam.transform.forward;
+
+        if (!freeLookOn)
+        {
+            x = Input.GetAxis("Horizontal");
+            z = Input.GetAxis("Vertical");
+        }
+        if(GetKeyDown(LeftShift))
+        {
+            speed = 20f;
+            virtualCam.m_Lens.FieldOfView = 60f;
+        }
+        else
+        {
+            speed = 5f;
+            virtualCam.m_Lens.FieldOfView = 40f;
+        }
+
+            Vector3 camForward = virtualCam.transform.forward;
         camForward.y = 0;
         camForward.Normalize();
 
